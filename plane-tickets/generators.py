@@ -1,7 +1,7 @@
 """Functions to automate Conda airlines ticketing system."""
-
-
-def generate_seat_letters(number):
+from typing import Literal
+SeatLetter = Literal["A"] | Literal["B"] | Literal["C"] | Literal["D"]
+def generate_seat_letters(number: int) -> SeatLetter:
     """Generate a series of letters for airline seats.
 
     :param number: int - total number of seat letters to be generated.
@@ -13,11 +13,10 @@ def generate_seat_letters(number):
     Example: A, B, C, D
 
     """
-
-    pass
-
-
-def generate_seats(number):
+    seat_letters = ("A", "B", "C", "D")
+    for seat in range(number):
+        yield seat_letters[seat % 4]
+def generate_seats(number: int) -> str:
     """Generate a series of identifiers for airline seats.
 
     :param number: int - total number of seats to be generated.
@@ -33,10 +32,14 @@ def generate_seats(number):
     Example: 3C, 3D, 4A, 4B
 
     """
-
-    pass
-
-def assign_seats(passengers):
+    number = number + 4 if number >= 13 else number
+    seat_letter_generator = generate_seat_letters(number)
+    return (
+        str(row_number) + next(seat_letter_generator)
+        for seat in range(number)
+        if (row_number := seat // 4 + 1) != 13
+    )
+def assign_seats(passengers: list[str]) -> dict[str, str]:
     """Assign seats to passengers.
 
     :param passengers: list[str] - a list of strings containing names of passengers.
@@ -45,10 +48,9 @@ def assign_seats(passengers):
     Example output: {"Adele": "1A", "Björk": "1B"}
 
     """
-
-    pass
-
-def generate_codes(seat_numbers, flight_id):
+    seat_generator = generate_seats(len(passengers))
+    return {name: next(seat_generator) for name in passengers}
+def generate_codes(seat_numbers: list[str], flight_id: str) -> str:
     """Generate codes for a ticket.
 
     :param seat_numbers: list[str] - list of seat numbers.
@@ -56,5 +58,8 @@ def generate_codes(seat_numbers, flight_id):
     :return: generator - generator that yields 12 character long ticket codes.
 
     """
+    for seat_number in seat_numbers:
+        code = seat_number + flight_id
+        yield code + "0" * (12 - len(code))
 
-    pass
+
